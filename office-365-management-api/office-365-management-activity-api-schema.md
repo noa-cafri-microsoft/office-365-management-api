@@ -1484,6 +1484,8 @@ The `Operation` property identifies the configuration change:
 
 These configuration-change events don't indicate whether an automation rule ran or a generated playbook completed. Both record types use the following properties, but not every event populates every property.
 
+For more information about automation rules and generated playbooks, see [Automation with ISOC in Microsoft Defender](/defender-xdr/siem-defender-automation).
+
 |Parameter|Type|Mandatory?|Description|
 |---|---|---|---|
 |ObjectName|Edm.String|No|The display name of the automation rule or the name of the generated playbook.|
