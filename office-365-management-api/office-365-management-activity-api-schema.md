@@ -4,7 +4,7 @@ title: Office 365 Management Activity API schema
 description: The Office 365 Management Activity API schema is provided as a data service in two layers - Common schema and service-specific schema.
 ms.ContentId: 1c2bf08c-4f3b-26c0-e1b2-90b190f641f5
 ms.topic: reference
-ms.date: 09/10/2026
+ms.date: 11/24/2026
 ai-usage: ai-assisted
 ms.localizationpriority: high
 ---
@@ -46,6 +46,7 @@ This article provides details on the Common schema as well as service-specific s
 |[Data Center Security Cmdlet schema](#data-center-security-cmdlet-schema)|Extends the Data Center Security Base schema with the properties specific to all data center security cmdlet audit data.|
 |[Microsoft Teams schema](#microsoft-teams-schema)|Extends the Common schema with the properties specific to all Microsoft Teams events.|
 |[Microsoft Defender XDR automation schema](#microsoft-defender-xdr-automation-schema)|Describes the Common schema properties used for Microsoft Defender XDR automation rule and generated playbook events.|
+|[Microsoft Defender case management schema](#microsoft-defender-case-management-schema)|Extends the Common schema with properties specific to case management events in the Microsoft Defender portal.|
 |[Microsoft Defender for Office 365 and Threat Investigation and Response schema](#microsoft-defender-for-office-365-and-threat-investigation-and-response-schema)|Extends the Common schema with the properties specific to Defender for Office 365 and threat investigation and response data.|
 |[Submission schema](#submission-schema)|Extends the Common schema with the properties specific to user and admin submissions in Microsoft Defender for Office 365.|
 |[Automated investigation and response events in Microsoft Defender for Office 365 Plan 2](#automated-investigation-and-response-events-in-microsoft-defender-for-office-365-plan-2)|Extends the Common schema with the properties specific to Office 365 automated investigation and response (AIR) events. To see an example, see [Tech Community blog: Improve the Effectiveness of your SOC with Microsoft Defender for Office 365 and the Office 365 Management API](https://techcommunity.microsoft.com/t5/microsoft-security-and/improve-the-effectiveness-of-your-soc-with-office-365-atp-and/ba-p/1525185).|
@@ -380,7 +381,8 @@ This article provides details on the Common schema as well as service-specific s
 |401|PlannerChatMessage|Microsoft Planner chat message events.|
 |402|PlannerChatMessageList|Microsoft Planner chat message list events.|
 |414|VivaEngageSegment|Viva Engage segmentation events.|
-|422|VivaEngageEvents|Events related to Viva Engage hosted events.|
+|422|DefenderCaseManagement|Events related to case management in the Microsoft Defender portal.|
+|424|VivaEngageEvents|Events related to Viva Engage hosted events.|
 |427|UniversalPrintManagement| Audit events related to Management events in Microsoft Universal Print.|
 |430|PurviewPostureAgent|Data Security Posture Agent events.|
 |431|GranularBrowseTask|Events related to browsing backed up site's restore point using Microsoft 365 Backup.|
@@ -1482,6 +1484,46 @@ For more information, see [Search the audit log for events in Microsoft Defender
 |SubmissionId|Edm.String|Yes|A unique identifier of the user concern report submission.|
 |ReportMetadata|Edm.String|Yes|A JSON-encoded string containing metadata about the report, including the report reason and details about the reported entity (message, call, or user).|
 
+## Microsoft Defender case management schema
+
+[Microsoft Defender case management events](/purview/audit-log-activities#microsoft-defender-xdr-case-management-activities) returned in [audit log searches](/purview/audit-search) use this schema. These events have `RecordType` set to `DefenderCaseManagement` (422). For more information, see [Manage security operations cases natively in the Microsoft Defender portal](/unified-secops/cases-overview).
+
+|Parameters|Type|Mandatory?|Description|
+|---|---|---|---|
+|CaseId|Edm.Int64|Yes|A unique identifier of the case that the record refers to.|
+|CaseName|Edm.String|No|The name of the case.|
+|CaseType|Edm.String|No|The type of case.|
+|ClosingNotes|Edm.String|No|The closing notes of the case.|
+|TemplateName|Edm.String|No|The name of the template used by the case.|
+|CasePriority|Edm.String|No|The priority of the case.|
+|Description|Edm.String|No|The description of the case.|
+|AssignedTo|Edm.String|No|The user or team assigned to the case.|
+|CaseStatusName|Edm.String|No|The current status of the case.|
+|CustomFields|Collection(Self.CustomField)|No|The custom field values on the case.|
+|LinkedObject|Self.LinkedObject|No|Details of the object linked to or unlinked from the case.|
+|Comment|Edm.String|No|The comment body for comment operations.|
+|CommentId|Edm.String|No|The identifier of the comment that the operation refers to.|
+|Tags|Collection(Edm.String)|No|The tags added to or removed from the case.|
+|Classification|Edm.String|No|The classification of the case.|
+|Severity|Edm.String|No|The severity of the case.|
+
+### CustomField complex type
+
+|Parameters|Type|Mandatory?|Description|
+|---|---|---|---|
+|FieldName|Edm.String|Yes|The name of the custom field.|
+|FieldType|Edm.String|Yes|The data type of the custom field.|
+|FieldValue|Edm.String|No|The value of the custom field.|
+
+### LinkedObject complex type
+
+|Parameters|Type|Mandatory?|Description|
+|---|---|---|---|
+|ObjectId|Edm.String|Yes|The identifier of the linked object.|
+|ObjectType|Edm.String|Yes|The type of linked object, such as an alert or entity.|
+|LinkType|Edm.String|No|The type of link between the object and the case.|
+|LinkNote|Edm.String|No|An optional note that describes the link.|
+
 ## Microsoft Defender for Office 365 and Threat Investigation and Response schema
 
 [Microsoft Defender for Office 365](/defender-office-365/mdo-about) events are available for Microsoft 365 customers who have Defender for Office 365, either included or as an add-on subscription. For example, Microsoft 365 Business Premium includes Defender for Office 365 Plan 1, and Microsoft 365 A5/E5/G5 includes Defender for Office 365 Plan 2.
@@ -2486,6 +2528,14 @@ The following table contain information related to AIP heartbeat events.
 |Parameters|Type|Mandatory?|Description|
 |---|---|---|---|
 |ClientUUID|Edm.String|Y|The Client UUID of the Viva Glint instance.|
+|CampaignUUID|Edm.String|N|The stable internal identifier of the agentic campaign.|
+|DataSubjectUUID|Edm.String|N|The stable internal identifier of the data subject affected by a data subject rights deletion.|
+|ExportFormat|Edm.String|N|The format of the exported agentic campaign data.|
+|ModifiedProperties|Edm.String|N|The properties that were changed by the operation.|
+|PolicyUUID|Edm.String|N|The stable internal identifier of the agentic policy.|
+|ReportUUID|Edm.String|N|The stable internal identifier of the agentic campaign report.|
+|RetentionCutoff|Edm.Date|N|The retention cutoff date used when agentic campaign data is deleted by the retention process.|
+|SharedWith|Edm.String|N|The recipients or scope with which an agentic campaign report was shared.|
 |ImportType|Edm.String|N|The data import source type.|
 |DataDSRControl|Edm.String|N|This in-platform control determines whether survey data is deleted when a user is removed from the Viva Glint platform.|
 |DiscardEmployeeIds|Edm.String|N|This in-platform control specifies whether the Employee IDs of previously deleted employees are disregarded or retained in the Viva Glint platform.|
